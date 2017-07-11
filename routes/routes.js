@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-mongoose.Promise = require("bluebird")
+const passport = require("passport");
+const BasicStrategy = require('passport-http').BasicStrategy;
+mongoose.Promise = require("bluebird");
 mongoose.connect("mongodb://localhost:27017/dataTrack");
-
+router.use( passport.authenticate('basic', {session: false}));
 const trackerSchema = new Schema({
   activityid: {type: Number , required: true, unique: true},
   activity: String
@@ -17,15 +19,35 @@ const statSchema = new Schema({
   date:{type:Date , default: Date.now()}
 })
 
+const userSchema = new Schema({
+  Username:String,
+  password:String
+})
 
+
+
+const users = {
+  "ahmad" : "bratton"
+};
 
 
 const activities = mongoose.model("activities",  trackerSchema);
 const stats = mongoose.model("stats",  statSchema);
+const user = mongoose.model("users", userSchema);
 
-let stationary;
 
-router.get("/api/activities", function (req, res) {
+
+passport.use(new BasicStrategy(
+  function(username, password, done) {
+    const userPassword = users[username];
+      if (!userPassword) { return done(null, false); }
+      if (userPassword !== password) { return done(null, false); }
+      return done(null, username);
+  }
+));
+
+
+router.get("/api/activities",  function (req, res) {
   activities.find({}).then(function (activities) {
     if (activities) {
       res.setHeader("Content-Type", "application/json");
