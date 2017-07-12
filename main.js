@@ -7,11 +7,11 @@ const path = require("path");
 const routes = require('./routes/routes');
 const session = require("express-session");
 
-app.engine("mustache", mex());
+
 
 app.set("port", (process.env.PORT || 3000));
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "mustache");
+
+
 
 // serve static files to server
 app.use(express.static(path.join(__dirname, "public")));
@@ -25,11 +25,8 @@ app.use(session({
   saveUninitialized:false
 }));
 
-// endpoint
-app.get("/", function (req , res) {
-  // render index.mustache file
-  res.render("index");
-});
+
+
 
 app.use(routes);
 

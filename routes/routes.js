@@ -1,41 +1,42 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require("mongoose");
+const models = require('../models/activity');
 const Schema = mongoose.Schema;
 const passport = require("passport");
 const BasicStrategy = require('passport-http').BasicStrategy;
 mongoose.Promise = require("bluebird");
 mongoose.connect("mongodb://localhost:27017/dataTrack");
 router.use( passport.authenticate('basic', {session: false}));
-const trackerSchema = new Schema({
-  activityid: {type: Number , required: true, unique: true},
-  activity: String
-});
-
-const statSchema = new Schema({
-  statid:{type: Number , required: true},
-  data: Number,
-  dataType:String,
-  date:{type:Date , default: Date.now()}
-})
-
-const userSchema = new Schema({
-  Username:String,
-  password:String
-})
-
-
+// const trackerSchema = new Schema({
+//   activityid: {type: Number , required: true, unique: true},
+//   activity: String
+// });
+//
+// const statSchema = new Schema({
+//   statid:{type: Number , required: true},
+//   data: Number,
+//   dataType:String,
+//   date:{type:Date , default: Date.now()}
+// })
+//
+// const userSchema = new Schema({
+//   Username:String,
+//   password:String
+// })
+//
+//
+//
+//
+//
+//
+// const activities = mongoose.model("activities",  trackerSchema);
+// const stats = mongoose.model("stats",  statSchema);
+// const user = mongoose.model("users", userSchema);
 
 const users = {
   "ahmad" : "bratton"
 };
-
-
-const activities = mongoose.model("activities",  trackerSchema);
-const stats = mongoose.model("stats",  statSchema);
-const user = mongoose.model("users", userSchema);
-
-
 
 passport.use(new BasicStrategy(
   function(username, password, done) {
@@ -48,7 +49,7 @@ passport.use(new BasicStrategy(
 
 
 router.get("/api/activities",  function (req, res) {
-  activities.find({}).then(function (activities) {
+  models.activities.find({}).then(function (activities) {
     if (activities) {
       res.setHeader("Content-Type", "application/json");
       res.status(200).json(activities);
@@ -60,12 +61,12 @@ router.get("/api/activities",  function (req, res) {
 });
 
 router.post("/api/activities", function (req, res) {
-  let activity = new activities({
+  let activity = new models.activities({
     activityid: req.body.activityid,
     activity: req.body.activity
   });
 
-  activities.create(activity).then(function (activity) {
+  models.activities.create(activity).then(function (activity) {
     if (activity) {
     res.setHeader("Content-Type", "application/json");
     res.status(201).json(activity);
@@ -76,7 +77,7 @@ router.post("/api/activities", function (req, res) {
 });
 
 router.get("/api/activities/:id", function (req, res) {
-stats.find({statid:req.params.id}).then(function (activity) {
+models.stats.find({statid:req.params.id}).then(function (activity) {
   if (activity) {
     res.setHeader("Content-Type", "application/json");
     res.status(200).json(activity);
@@ -96,7 +97,7 @@ router.put("/api/activities/:id", function (req, res) {
     dataType:req.body.dataType
   })
 
-activities.update({activityid:req.params.id}, updatedActivity).then(function (activity) {
+models.activities.update({activityid:req.params.id}, updatedActivity).then(function (activity) {
   if (activity) {
 
     res.setHeader("Content-Type", "application/json");
@@ -105,33 +106,33 @@ activities.update({activityid:req.params.id}, updatedActivity).then(function (ac
     res.status(403).send("no activity found")
   }
 })
-stats.update({statid:req.params.id}, updatedstat).then(function (stat) {
+models.stats.update({statid:req.params.id}, updatedstat).then(function (stat) {
 
 });
 
 });
 
 router.delete("/api/activities/:id", function (req, res) {
-activities.deleteOne({activityid:req.params.id}).then(function (deleted) {
+models.activities.deleteOne({activityid:req.params.id}).then(function (deleted) {
   if (deleted) {
     res.status(200).send("activity delete");
   }else {
     res.status(404).send("no activity found");
   }
 })
-stats.deleteMany({statid:req.params.id}).then(function (deletedstats) {
+models.stats.deleteMany({statid:req.params.id}).then(function (deletedstats) {
 
 })
 });
 
 router.post("/api/activities/:id/stats", function (req, res) {
-  let dataActivity = new stats({
+  let dataActivity = new models.stats({
     statid:req.params.id,
     data: req.body.data,
     dataType:req.body.dataType
   })
 
-    stats.create(dataActivity).then(function (data) {
+    models.stats.create(dataActivity).then(function (data) {
       if (data) {
         res.setHeader("Content-Type", "application/json");
         res.status(201).json(data);
@@ -145,7 +146,7 @@ router.post("/api/activities/:id/stats", function (req, res) {
 
 
 router.delete("/api/stats/:id", function (req, res) {
-  stats.deleteOne({_id:req.params.id}).then(function (data) {
+  models.stats.deleteOne({_id:req.params.id}).then(function (data) {
     if (data) {
       res.status(200).send("stat gone");
     }else {
