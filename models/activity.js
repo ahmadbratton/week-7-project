@@ -8,6 +8,7 @@ const trackerSchema = new Schema({
 });
 
 const statSchema = new Schema({
+  activity: String,
   statid:{type: Number , required: true},
   data: Number,
   dataType:String,

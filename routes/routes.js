@@ -33,6 +33,7 @@ router.use( passport.authenticate('basic', {session: false}));
 // const activities = mongoose.model("activities",  trackerSchema);
 // const stats = mongoose.model("stats",  statSchema);
 // const user = mongoose.model("users", userSchema);
+let name;
 
 const users = {
   "ahmad" : "bratton"
@@ -46,6 +47,12 @@ passport.use(new BasicStrategy(
       return done(null, username);
   }
 ));
+
+// const findActivity = function (req, res, next) {
+//   models.activities.findOne({activityid:req.params.id}).then(function (activity) {
+//      let name = activity.activity
+// })
+// }
 
 
 router.get("/api/activities",  function (req, res) {
@@ -77,12 +84,12 @@ router.post("/api/activities", function (req, res) {
 });
 
 router.get("/api/activities/:id", function (req, res) {
-models.stats.find({statid:req.params.id}).then(function (activity) {
-  if (activity) {
+models.stats.find({statid:req.params.id}).then(function (stats) {
+  if (stats) {
     res.setHeader("Content-Type", "application/json");
-    res.status(200).json(activity);
+    res.status(200).json(stats);
   }else {
-    res.status(404).send("no activity")
+    res.status(404).send("no stats")
   }
 })
 });
@@ -125,8 +132,14 @@ models.stats.deleteMany({statid:req.params.id}).then(function (deletedstats) {
 })
 });
 
-router.post("/api/activities/:id/stats", function (req, res) {
+router.post("/api/activities/:id/stats",  function (req, res) {
+  models.activities.findOne({activityid:req.params.id}).then(function (activity) {
+      name = activity.activity
+
+console.log(name);
+
   let dataActivity = new models.stats({
+    activity: name,
     statid:req.params.id,
     data: req.body.data,
     dataType:req.body.dataType
@@ -140,7 +153,7 @@ router.post("/api/activities/:id/stats", function (req, res) {
         res.status(403).send("no activity found")
       }
     })
-
+});
 
 });
 
