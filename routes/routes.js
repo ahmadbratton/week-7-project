@@ -8,31 +8,8 @@ const BasicStrategy = require('passport-http').BasicStrategy;
 mongoose.Promise = require("bluebird");
 mongoose.connect("mongodb://localhost:27017/dataTrack");
 router.use( passport.authenticate('basic', {session: false}));
-// const trackerSchema = new Schema({
-//   activityid: {type: Number , required: true, unique: true},
-//   activity: String
-// });
-//
-// const statSchema = new Schema({
-//   statid:{type: Number , required: true},
-//   data: Number,
-//   dataType:String,
-//   date:{type:Date , default: Date.now()}
-// })
-//
-// const userSchema = new Schema({
-//   Username:String,
-//   password:String
-// })
-//
-//
-//
-//
-//
-//
-// const activities = mongoose.model("activities",  trackerSchema);
-// const stats = mongoose.model("stats",  statSchema);
-// const user = mongoose.model("users", userSchema);
+
+
 let name;
 
 const users = {
@@ -48,11 +25,7 @@ passport.use(new BasicStrategy(
   }
 ));
 
-// const findActivity = function (req, res, next) {
-//   models.activities.findOne({activityid:req.params.id}).then(function (activity) {
-//      let name = activity.activity
-// })
-// }
+
 
 
 router.get("/api/activities",  function (req, res) {
@@ -84,14 +57,24 @@ router.post("/api/activities", function (req, res) {
 });
 
 router.get("/api/activities/:id", function (req, res) {
-models.stats.find({statid:req.params.id}).then(function (stats) {
-  if (stats) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json(stats);
-  }else {
-    res.status(404).send("no stats")
-  }
+  models.stats.find({statid:req.params.id}).then(function (stats) {
+    if (stats.length > 0) {
+      res.setHeader("Content-Type", "application/json");
+      res.status(200).json(stats);
+    }else {
+      models.activities.find({activityid:req.params.id}).then(function (activity) {
+        if (activity.length > 0) {
+          res.setHeader("Content-Type", "application/json");
+          res.status(200).json(activity);
+        }else {
+          res.send("no activities found")
+        }
+
+    })
+    }
 })
+
+
 });
 
 router.put("/api/activities/:id", function (req, res) {
